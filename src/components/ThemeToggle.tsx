@@ -26,6 +26,9 @@ export default function ThemeToggle({ compact = false }: { compact?: boolean }) 
     const next = activeTheme() === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
     document.documentElement.style.colorScheme = next;
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", next === "dark" ? "#071b2b" : "#f8fbfa");
     localStorage.setItem("cedah-theme", next);
     setTheme(next);
     window.dispatchEvent(new Event("cedah-theme-change"));

@@ -65,10 +65,7 @@ export const metadata: Metadata = {
   },
 };
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8fbfa" },
-    { media: "(prefers-color-scheme: dark)", color: "#071b2b" },
-  ],
+  themeColor: "#f8fbfa",
   colorScheme: "light dark",
 };
 export default function RootLayout({
@@ -98,7 +95,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var saved=localStorage.getItem('cedah-theme');var theme=saved==='light'||saved==='dark'?saved:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme;}catch(e){}})();`,
+            __html: `(function(){try{var saved=localStorage.getItem('cedah-theme');var theme=saved==='dark'?'dark':'light';document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme;}catch(e){document.documentElement.dataset.theme='light';document.documentElement.style.colorScheme='light';}})();`,
           }}
         />
       </head>
