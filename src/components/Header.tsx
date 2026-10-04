@@ -2,6 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const groups = [
   {
@@ -166,10 +167,15 @@ export default function Header() {
               >
                 Administrator login <span>→</span>
               </Link>
+              <div className="mobile-theme-control">
+                <span>Appearance</span>
+                <ThemeToggle />
+              </div>
               <a href="mailto:info@cedah.com">info@cedah.com</a>
             </div>
           </nav>
           <div className="nav-actions">
+            <ThemeToggle compact />
             <Link
               href="/admin/login"
               className="login-link"
@@ -184,13 +190,16 @@ export default function Header() {
           <button
             className={`menu ${open ? "active" : ""}`}
             onClick={() => setOpen(!open)}
-            aria-label="Toggle navigation"
+            aria-label={open ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={open}
             aria-controls="primary-navigation"
           >
-            <span />
-            <span />
-            <span />
+            <span className="menu-label">{open ? "Close" : "Menu"}</span>
+            <span className="menu-bars" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
           </button>
         </div>
       </header>

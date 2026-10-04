@@ -65,8 +65,11 @@ export const metadata: Metadata = {
   },
 };
 export const viewport: Viewport = {
-  themeColor: "#041f39",
-  colorScheme: "light",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8fbfa" },
+    { media: "(prefers-color-scheme: dark)", color: "#071b2b" },
+  ],
+  colorScheme: "light dark",
 };
 export default function RootLayout({
   children,
@@ -91,7 +94,14 @@ export default function RootLayout({
     sameAs: [process.env.NEXT_PUBLIC_LINKEDIN_URL].filter(Boolean),
   };
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var saved=localStorage.getItem('cedah-theme');var theme=saved==='light'||saved==='dark'?saved:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme;}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className={`${body.variable} ${display.variable}`}>
         <script
           type="application/ld+json"

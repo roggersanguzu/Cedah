@@ -116,6 +116,17 @@ await check("Contact submission storage", async () => {
   });
   assert(response.ok, `HTTP ${response.status}`);
 
+  const adminResponse = await fetch(`${baseUrl}/api/admin/submissions`, {
+    headers: { Cookie: sessionCookie },
+    cache: "no-store",
+  });
+  const adminData = await adminResponse.json();
+  assert(adminResponse.ok, `admin enquiries returned HTTP ${adminResponse.status}`);
+  assert(
+    adminData.items?.some((item) => item.email === email),
+    "stored submission was not returned to the admin dashboard",
+  );
+
   const dnsServers = process.env.MONGODB_DNS_SERVERS?.split(",")
     .map((server) => server.trim())
     .filter(Boolean);

@@ -4,16 +4,38 @@ export default function ContactForm() {
   const [state, setState] = useState<"idle" | "loading" | "success" | "error">(
     "idle",
   );
+  const [error, setError] = useState("");
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const element = e.currentTarget;
     setState("loading");
-    const form = new FormData(e.currentTarget);
-    const response = await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(Object.fromEntries(form)),
-    });
-    setState(response.ok ? "success" : "error");
+    setError("");
+    const form = new FormData(element);
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(Object.fromEntries(form)),
+      });
+      const result = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
+      if (!response.ok) {
+        setError(
+          result.error ||
+            "We could not send your message. Please try again or email info@cedah.com.",
+        );
+        setState("error");
+        return;
+      }
+      element.reset();
+      setState("success");
+    } catch {
+      setError(
+        "We could not send your message. Please check your connection and try again.",
+      );
+      setState("error");
+    }
   }
   if (state === "success")
     return (
@@ -87,9 +109,8 @@ export default function ContactForm() {
         <span>↗</span>
       </button>
       {state === "error" && (
-        <p className="form-error">
-          We could not send your message. Please try again or email
-          info@cedah.com.
+        <p className="form-error" role="alert" aria-live="polite">
+          {error}
         </p>
       )}
     </form>

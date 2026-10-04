@@ -3,10 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import ThemeToggle from "@/components/ThemeToggle";
 export default function Login() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
@@ -17,9 +19,16 @@ export default function Login() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),
     });
+    const result = (await response.json().catch(() => ({}))) as {
+      error?: string;
+    };
     setLoading(false);
     if (!response.ok) {
-      setError("The email or password is incorrect.");
+      setError(
+        response.status === 429
+          ? result.error || "Too many sign-in attempts. Please try again later."
+          : "The email or password is incorrect.",
+      );
       return;
     }
     router.push("/admin");
@@ -27,6 +36,9 @@ export default function Login() {
   }
   return (
     <main className="login-page">
+      <div className="login-theme">
+        <ThemeToggle />
+      </div>
       <div className="login-visual">
         <Link href="/">
           <Image
@@ -70,13 +82,36 @@ export default function Login() {
           </label>
           <label>
             Password
-            <input
-              name="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              placeholder="Enter your password"
-            />
+            <span className="password-field">
+              <input
+                name="password"
+                type={showPassword ? "text" : "password"}
+                required
+                autoComplete="current-password"
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((visible) => !visible)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  {showPassword ? (
+                    <>
+                      <path d="M3 3l18 18" />
+                      <path d="M10.6 10.7a2 2 0 0 0 2.7 2.7M9.9 4.2A10.8 10.8 0 0 1 12 4c5.4 0 9 5 9 5a16 16 0 0 1-2.1 2.5M6.6 6.7C4.4 8.2 3 10 3 10s3.6 5 9 5c1 0 2-.2 2.9-.5" />
+                    </>
+                  ) : (
+                    <>
+                      <path d="M3 12s3.6-5 9-5 9 5 9 5-3.6 5-9 5-9-5-9-5Z" />
+                      <circle cx="12" cy="12" r="2.4" />
+                    </>
+                  )}
+                </svg>
+              </button>
+            </span>
           </label>
           {error && <div className="login-error">{error}</div>}
           <button disabled={loading}>

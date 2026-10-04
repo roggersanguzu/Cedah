@@ -80,10 +80,38 @@ async function verifyCloudinary() {
   console.log("Cloudinary: authenticated Admin API request passed");
 }
 
+async function verifyUpstash() {
+  const endpoint = process.env.UPSTASH_REDIS_REST_URL?.replace(/\/$/, "");
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!endpoint || !token) {
+    throw new Error("both Upstash REST variables must be configured together");
+  }
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(["PING"]),
+    signal: AbortSignal.timeout(12_000),
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || data?.result !== "PONG") {
+    throw new Error(`Upstash Redis REST API returned HTTP ${response.status}`);
+  }
+  console.log("Upstash Redis: authenticated REST request passed");
+}
+
 const checks = [
   ["MongoDB", verifyMongoDB],
   ["Cloudinary", verifyCloudinary],
 ];
+if (
+  process.env.UPSTASH_REDIS_REST_URL ||
+  process.env.UPSTASH_REDIS_REST_TOKEN
+) {
+  checks.push(["Upstash Redis", verifyUpstash]);
+}
 let failed = false;
 
 for (const [name, verify] of checks) {

@@ -6,14 +6,15 @@
 2. Add the Cloudinary cloud name, API key and API secret.
 3. Generate a long random `AUTH_SECRET` and replace the initial administrator password.
 4. Add the production site URL and contact email settings.
-5. Run `npm run db:setup` once to create MongoDB indexes.
-6. Run `npm run db:seed` once to add approved starter content without overwriting future administrator edits.
+5. Add both Upstash REST values to enable distributed login and contact-form rate limiting. The application remains available without them, but production deployments should configure them together.
+6. Run `npm run db:setup` once to create MongoDB indexes.
+7. Run `npm run db:seed` once to add approved starter content without overwriting future administrator edits.
 
 If the deployment network blocks MongoDB Atlas SRV lookups, set `MONGODB_DNS_SERVERS` to a comma-separated resolver list such as `8.8.8.8,1.1.1.1`.
 
 ## Vercel
 
-Import the repository, add every required value from `.env.example` in Project Settings > Environment Variables, and deploy. Set `NEXT_PUBLIC_SITE_URL` to the final HTTPS domain. The health endpoint is `/api/health` and returns a degraded response if MongoDB or Cloudinary cannot be reached.
+Import the repository, add every required value from `.env.example` in Project Settings > Environment Variables, and deploy. Use `NEXT_PUBLIC_SITE_URL` as the single canonical application URL and set it to the final HTTPS domain. The health endpoint is `/api/health` and returns a degraded response if MongoDB or Cloudinary cannot be reached.
 
 ## Docker
 

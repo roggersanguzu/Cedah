@@ -1,8 +1,9 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type Submission = {
   id?: string;
@@ -84,6 +85,7 @@ export default function AdminDashboard({
   const [tab, setTab] = useState("Overview");
   const [toast, setToast] = useState("");
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [submissionsLoading, setSubmissionsLoading] = useState(true);
   const [enterprises, setEnterprises] = useState(defaultEnterprises);
   const [newsItems, setNewsItems] = useState(defaultNews);
   const [projects, setProjects] = useState<string[]>([]);
@@ -94,11 +96,36 @@ export default function AdminDashboard({
   >("checking");
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState("");
+  const refreshSubmissions = useCallback(async (silent = false) => {
+    if (!silent) setSubmissionsLoading(true);
+    try {
+      const response = await fetch("/api/admin/submissions", {
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error("Could not load enquiries");
+      const data = await response.json();
+      setSubmissions(data.items || []);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      if (!silent) setSubmissionsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    fetch("/api/admin/submissions")
-      .then((r) => (r.ok ? r.json() : { items: [] }))
-      .then((d) => setSubmissions(d.items || []))
-      .catch(() => {});
+    const initial = window.setTimeout(() => void refreshSubmissions(), 0);
+    const interval = window.setInterval(
+      () => void refreshSubmissions(true),
+      30_000,
+    );
+    return () => {
+      window.clearTimeout(initial);
+      window.clearInterval(interval);
+    };
+  }, [refreshSubmissions]);
+
+  useEffect(() => {
     fetch("/api/admin/data/enterprises")
       .then((r) => r.json())
       .then((d) => {
@@ -366,9 +393,18 @@ export default function AdminDashboard({
             <h1>{title}</h1>
           </div>
           <div className="admin-top-actions">
+            <ThemeToggle compact />
             <Link href="/" target="_blank">
               View live website ↗
             </Link>
+            <button
+              className="admin-top-logout"
+              onClick={logout}
+              aria-label="Sign out of the admin dashboard"
+              title="Sign out"
+            >
+              <span aria-hidden="true">↪</span>
+            </button>
             <button
               className="notification"
               aria-label="Open enquiries"
@@ -644,7 +680,20 @@ export default function AdminDashboard({
           />
         )}
         {tab === "Impact metrics" && <ImpactManager notify={notify} />}
-        {tab === "Enquiries" && <EnquiryManager submissions={submissions} />}
+        {tab === "Enquiries" && (
+          <EnquiryManager
+            submissions={submissions}
+            loading={submissionsLoading}
+            refresh={async () => {
+              const refreshed = await refreshSubmissions();
+              notify(
+                refreshed
+                  ? "Enquiries refreshed from MongoDB"
+                  : "Could not refresh enquiries",
+              );
+            }}
+          />
+        )}
         {tab === "Media library" && <MediaLibrary notify={notify} />}
         {tab === "Settings" && (
           <Settings name={name} email={email} notify={notify} />
@@ -966,7 +1015,15 @@ function ImpactManager({ notify }: { notify: (s: string) => void }) {
     </div>
   );
 }
-function EnquiryManager({ submissions }: { submissions: Submission[] }) {
+function EnquiryManager({
+  submissions,
+  loading,
+  refresh,
+}: {
+  submissions: Submission[];
+  loading: boolean;
+  refresh: () => Promise<void>;
+}) {
   const items = submissions;
   function exportCsv() {
     if (!items.length) return;
@@ -1004,9 +1061,14 @@ function EnquiryManager({ submissions }: { submissions: Submission[] }) {
           Review partnership, buyer, supplier and general enquiries received
           through the website.
         </p>
-        <button onClick={exportCsv} disabled={!items.length}>
-          Export CSV
-        </button>
+        <div className="enquiry-actions">
+          <button onClick={() => void refresh()} disabled={loading}>
+            {loading ? "Refreshing..." : "Refresh"}
+          </button>
+          <button onClick={exportCsv} disabled={!items.length}>
+            Export CSV
+          </button>
+        </div>
       </div>
       <div className="inbox">
         <div className="inbox-list">
