@@ -23,7 +23,11 @@ Copy the required values from `.env.example` into `.env.local`. After adding the
 
 ```bash
 npm run db:setup
+npm run db:seed
+npm run services:verify
 ```
+
+`db:seed` inserts the approved starter content only when a record does not already exist. It does not overwrite content published later through the dashboard.
 
 The public website is available at `http://localhost:3000`. Administrator sign-in is at `/admin/login`.
 
@@ -32,6 +36,10 @@ The public website is available at `http://localhost:3000`. Administrator sign-i
 ```bash
 npm run lint
 npm run build
+npm run services:verify
+npm run security:check
 ```
+
+For an end-to-end runtime check, start the production server and run `npm run app:smoke -- http://localhost:3000` in a second terminal. The smoke test checks service health, authentication, protected admin data and temporary contact storage cleanup.
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for Vercel, Docker and production-security instructions.

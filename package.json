@@ -10,6 +10,7 @@
     "db:setup": "node --env-file=.env.local scripts/setup-mongodb.mjs",
     "db:seed": "node --env-file=.env.local scripts/seed-mongodb.mjs",
     "app:smoke": "node --env-file=.env.local scripts/smoke-app.mjs",
+    "security:check": "node --env-file=.env.local scripts/check-secrets.mjs",
     "services:verify": "node --env-file=.env.local scripts/verify-services.mjs"
   },
   "dependencies": {

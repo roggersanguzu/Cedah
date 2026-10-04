@@ -28,7 +28,10 @@ await check("Public homepage", async () => {
     html.includes("Capital Economic Development Alliance Holdings"),
     "company identity was not rendered",
   );
-  assert(!html.includes("—"), "an em dash remains in rendered copy");
+  assert(
+    !html.includes(String.fromCodePoint(0x2014)),
+    "an em dash remains in rendered copy",
+  );
 });
 
 await check("Service health", async () => {
