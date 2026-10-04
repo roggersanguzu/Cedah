@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { getSiteSettings } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Terms of Use",
   description:
     "Terms governing use of the CEDAH website and its published information.",
   alternates: { canonical: "/terms" },
 };
-export default function Terms() {
+export default async function Terms() {
+  const settings = await getSiteSettings();
   return (
     <>
-      <Header />
-      <main className="legal-page">
+      <Header settings={settings} />
+      <main className="legal-page" id="main-content" tabIndex={-1}>
         <div className="shell legal-wrap">
           <span className="legal-kicker">Website terms</span>
           <h1>Terms of use</h1>
@@ -54,11 +56,11 @@ export default function Terms() {
           </section>
           <section>
             <h2>Contact</h2>
-            <p>Questions about these terms can be sent to info@cedah.com.</p>
+            <p>Questions about these terms can be sent to <a href={`mailto:${settings.publicEmail}`}>{settings.publicEmail}</a>.</p>
           </section>
         </div>
       </main>
-      <Footer />
+      <Footer settings={settings} />
     </>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 import { FormEvent, useState } from "react";
+import { LoadingMark } from "@/components/LoadingIndicator";
 export default function ContactForm() {
   const [state, setState] = useState<"idle" | "loading" | "success" | "error">(
     "idle",
@@ -39,11 +40,11 @@ export default function ContactForm() {
   }
   if (state === "success")
     return (
-      <div className="success">
+      <div className="success" role="status">
         <span className="success-icon">✓</span>
         <b>Thank you for reaching out.</b>
         <span>
-          Your enquiry has been received. The CEDAH team will respond shortly.
+          Your enquiry has been saved for the CEDAH team to review.
         </span>
         <button onClick={() => setState("idle")}>Send another enquiry</button>
       </div>
@@ -53,7 +54,7 @@ export default function ContactForm() {
       <div className="form-row">
         <label>
           Your name
-          <input name="name" required placeholder="Full name" />
+          <input name="name" autoComplete="name" maxLength={120} required placeholder="Full name" />
         </label>
         <label>
           Email address
@@ -61,6 +62,8 @@ export default function ContactForm() {
             name="email"
             required
             type="email"
+            autoComplete="email"
+            maxLength={180}
             placeholder="you@company.com"
           />
         </label>
@@ -68,7 +71,7 @@ export default function ContactForm() {
       <div className="form-row">
         <label>
           Phone number
-          <input name="phone" placeholder="+256 ..." />
+          <input name="phone" type="tel" autoComplete="tel" maxLength={60} placeholder="+256 ..." />
         </label>
         <label>
           I’m interested in
@@ -91,6 +94,7 @@ export default function ContactForm() {
         <textarea
           name="message"
           required
+          maxLength={4000}
           placeholder="Tell us briefly about your interest..."
         />
       </label>
@@ -99,12 +103,16 @@ export default function ContactForm() {
         className="honey"
         tabIndex={-1}
         autoComplete="off"
+        aria-hidden="true"
+        aria-label="Leave blank"
       />
+      <p className="contact-privacy">Your details are used to respond to this enquiry. <a href="/privacy">Read our privacy policy.</a></p>
       <button
         className="button teal"
         type="submit"
         disabled={state === "loading"}
       >
+        {state === "loading" && <LoadingMark small />}
         {state === "loading" ? "Sending…" : "Start a conversation"}{" "}
         <span>↗</span>
       </button>

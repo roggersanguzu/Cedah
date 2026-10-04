@@ -2,6 +2,9 @@
 
 Production website and content-management platform for Capital Economic Development Alliance Holdings Ltd.
 
+See [PLATFORM-GUIDE.md](./PLATFORM-GUIDE.md) for the public features, super-administrator publishing workflows, and the CEDAH content still needed for publication.
+See [REQUIREMENTS-AUDIT.md](./REQUIREMENTS-AUDIT.md) for coverage, verification results and remaining production/content checks.
+
 ## Platform capabilities
 
 - Public agribusiness website focused initially on crop and beef enterprises
@@ -31,11 +34,14 @@ npm run services:verify
 
 The public website is available at `http://localhost:3000`. Administrator sign-in is at `/admin/login`.
 
+Local development uses Webpack because the Turbopack development output on this project produced a global CSS chunk containing dashboard styles. Run `npm run dev` to use the verified development configuration. Production builds continue to use the default Next.js bundler.
+
 ## Verification
 
 ```bash
 npm run lint
 npm run build
+npm run check:styles -- http://localhost:3000
 npm run services:verify
 npm run security:check
 ```

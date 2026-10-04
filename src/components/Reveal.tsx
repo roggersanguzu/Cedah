@@ -14,6 +14,18 @@ export default function Reveal({
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (motion.matches || !("IntersectionObserver" in window)) {
+      node.classList.add("is-visible");
+      return;
+    }
+    // Keep content visible before hydration and without JavaScript. Animate
+    // only blocks that begin below the viewport, avoiding a flash of hiding.
+    if (node.getBoundingClientRect().top < window.innerHeight) {
+      node.classList.add("is-visible");
+      return;
+    }
+    node.classList.add("will-reveal");
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -21,10 +33,12 @@ export default function Reveal({
           observer.unobserve(node);
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -40px" },
+      { threshold: 0, rootMargin: "0px 0px -24px" },
     );
     observer.observe(node);
-    return () => observer.disconnect();
+    const showWithoutMotion = () => { if (motion.matches) { node.classList.add("is-visible"); observer.disconnect(); } };
+    motion.addEventListener("change", showWithoutMotion);
+    return () => { observer.disconnect(); motion.removeEventListener("change", showWithoutMotion); };
   }, []);
   return (
     <div

@@ -28,6 +28,9 @@ try {
       .collection("funding_opportunities")
       .createIndex({ slug: 1 }, { unique: true }),
     db.collection("team_partners").createIndex({ slug: 1 }, { unique: true }),
+    ...["partner_documents", "field_stories", "market_prices", "operating_sites", "products", "roadmap", "objectives"].map((name) =>
+      db.collection(name).createIndex({ slug: 1 }, { unique: true }),
+    ),
     db
       .collection("impact_metrics")
       .createIndex({ metric_key: 1 }, { unique: true }),
@@ -35,6 +38,8 @@ try {
       .collection("media_assets")
       .createIndex({ public_id: 1 }, { unique: true }),
     db.collection("contact_submissions").createIndex({ created_at: -1 }),
+    db.collection("contact_submissions").createIndex({ kind: 1, email: 1 }),
+    db.collection("contact_submissions").createIndex({ unsubscribe_token_hash: 1 }, { sparse: true }),
     db
       .collection("contact_submissions")
       .createIndex({ status: 1, created_at: -1 }),

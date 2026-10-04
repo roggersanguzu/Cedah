@@ -1,5 +1,8 @@
 @import "tailwindcss";
 :root {
+  --surface: #fff;
+  --surface-raised: #fff;
+  --surface-soft: #f3f7f6;
   --navy: #062c51;
   --navy2: #041f39;
   --teal: #29a7b7;
@@ -807,11 +810,15 @@ body {
   animation: bounce 2s infinite;
 }
 .reveal {
-  opacity: 0;
-  transform: translateY(32px);
+  opacity: 1;
+  transform: none;
   transition:
     opacity 0.8s cubic-bezier(0.2, 0.75, 0.2, 1),
     transform 0.8s cubic-bezier(0.2, 0.75, 0.2, 1);
+}
+.reveal.will-reveal:not(.is-visible) {
+  opacity: 0;
+  transform: translateY(28px);
 }
 .reveal.is-visible {
   opacity: 1;
@@ -4233,6 +4240,9 @@ html[data-theme="light"] {
 }
 html[data-theme="dark"] {
   color-scheme: dark;
+  --surface: #071925;
+  --surface-raised: #102838;
+  --surface-soft: #0b2131;
   --ink: #e7f0f3;
   --muted: #a4b7bf;
   --cream: #0b2131;
@@ -4906,5 +4916,275 @@ html[data-theme="dark"] .enquiry-actions button:first-child {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Shared device support and always-available contact controls. */
+img,
+video {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.shell > *,
+.footer-main > *,
+.intro-grid > *,
+.section-head > *,
+.model-grid > *,
+.cta-box > *,
+.venture-grid > *,
+.story-grid > *,
+.investment-head > * {
+  min-width: 0;
+}
+
+.footer-main,
+.legal-wrap,
+.cta-box,
+.news-card {
+  overflow-wrap: anywhere;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 200;
+  top: 8px;
+  left: 12px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  background: var(--navy);
+  color: #fff;
+  transform: translateY(-150%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.theme-toggle {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 9px 12px;
+  font-size: 12px;
+}
+
+.theme-toggle .theme-toggle-icon {
+  width: 21px;
+  height: 21px;
+  flex: none;
+}
+
+.whatsapp-link {
+  position: fixed;
+  z-index: 45;
+  right: max(22px, env(safe-area-inset-right));
+  bottom: max(22px, env(safe-area-inset-bottom));
+  width: 56px;
+  height: 56px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #128c4b;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 24px #001c2440;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.whatsapp-link svg {
+  width: 35px;
+  height: 35px;
+}
+
+.whatsapp-link:hover {
+  background: #08743b;
+  transform: translateY(-2px);
+}
+
+.whatsapp-tooltip {
+  position: absolute;
+  right: calc(100% + 12px);
+  width: max-content;
+  max-width: calc(100vw - 115px);
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: var(--navy2);
+  color: #fff;
+  font-size: 12px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.whatsapp-link:is(:hover, :focus-visible) .whatsapp-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+body.menu-open .whatsapp-link {
+  visibility: hidden;
+}
+
+footer {
+  padding-bottom: max(18px, env(safe-area-inset-bottom));
+}
+
+html[data-theme="dark"] .legal-page {
+  background: var(--surface-soft);
+}
+
+html[data-theme="dark"] .legal-wrap section {
+  background: var(--surface-raised);
+  border-color: var(--line);
+}
+
+html[data-theme="dark"] .legal-lead {
+  color: var(--ink) !important;
+}
+
+html[data-theme="dark"] :is(.legal-wrap section p, .login-panel label, .login-panel form > a) {
+  color: var(--muted);
+}
+
+html[data-theme="dark"] .cta {
+  background: var(--surface-soft);
+}
+
+html[data-theme="dark"] .mobile-login {
+  background: #163748;
+  color: var(--ink);
+}
+
+html[data-theme="dark"] .eyebrow:not(.light) {
+  color: #79d5dc;
+}
+
+@media (max-width: 1120px) and (min-width: 951px) {
+  .brand,
+  .header.scrolled .brand {
+    width: 190px;
+    flex-shrink: 0;
+  }
+
+  .nav-group-row > a {
+    padding-inline: 7px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 950px) {
+  .header .brand,
+  .header.scrolled .brand {
+    width: min(220px, calc(100vw - 210px));
+    flex-shrink: 0;
+  }
+
+  .nav-actions {
+    position: relative;
+    z-index: 94;
+    display: flex;
+    margin-left: auto;
+    margin-right: 104px;
+  }
+
+  .nav-actions > a {
+    display: none;
+  }
+
+  .nav {
+    height: calc(100dvh - 72px);
+    padding-bottom: max(30px, env(safe-area-inset-bottom));
+  }
+
+  .header.scrolled .nav {
+    height: calc(100dvh - 70px);
+  }
+
+  .mobile-submenu-toggle {
+    width: 44px;
+    height: 44px;
+  }
+
+  .subnav a {
+    min-height: 44px;
+    font-size: 13px !important;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .header .brand,
+  .header.scrolled .brand {
+    width: min(220px, calc(100vw - 148px));
+  }
+
+  .nav-actions {
+    margin-right: 54px;
+  }
+
+  .header .menu {
+    width: 44px !important;
+    padding: 0 9px !important;
+    justify-content: center !important;
+  }
+
+  .header .menu .menu-label {
+    display: none !important;
+  }
+
+  .hero-actions,
+  .hero-signals {
+    flex-wrap: wrap;
+  }
+
+  .hero-content {
+    padding-top: 64px;
+  }
+
+  .hero {
+    height: auto;
+    max-height: none;
+    padding-bottom: 130px;
+  }
+
+  .footer-brand img {
+    max-width: 100%;
+  }
+
+  .footer-main {
+    column-gap: 24px;
+  }
+
+  .copyright {
+    padding-right: 58px;
+    padding-bottom: 48px;
+    line-height: 1.6;
+  }
+
+  .whatsapp-link {
+    width: 50px;
+    height: 50px;
+    right: max(14px, env(safe-area-inset-right));
+    bottom: max(14px, env(safe-area-inset-bottom));
+  }
+
+  .login-panel {
+    min-height: 100dvh;
+    padding-bottom: 84px;
   }
 }

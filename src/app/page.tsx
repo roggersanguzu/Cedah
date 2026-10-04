@@ -6,6 +6,8 @@ import Header from "@/components/Header";
 import Reveal from "@/components/Reveal";
 import ScrollProgress from "@/components/ScrollProgress";
 import { getPublishedContent, getPublicRecords } from "@/lib/content";
+import { DEFAULT_SITE_SETTINGS, DEFAULT_ENTERPRISES, isSafeUrl } from "@/lib/platform";
+import { ObjectivesSection, ImpactDashboard, TrustSections, ParticipationSections, PublishedRoadmap } from "@/components/PlatformSections";
 
 // Admin-published MongoDB content should be visible without a new deployment.
 export const dynamic = "force-dynamic";
@@ -87,34 +89,15 @@ const pillars = [
     text: "Absorbing qualified graduates into CEDAH and connecting others to partner businesses and markets.",
   },
 ];
-const updates = [
-  {
-    tag: "Enterprise",
-    date: "August 2026",
-    title:
-      "CEDAH establishes crops and beef as its first operating value chains",
-    text: "The opening phase connects primary production with a long-term path into processing and market access.",
-  },
-  {
-    tag: "Partnerships",
-    date: "July 2026",
-    title: "Building the producer and buyer network for responsible growth",
-    text: "Early conversations focus on strong farm supply, dependable off-take and measurable shared value.",
-  },
-  {
-    tag: "Roadmap",
-    date: "June 2026",
-    title: "A phased plan from farm enterprise to industrial value addition",
-    text: "CEDAH’s growth roadmap prioritizes disciplined execution before expansion into new units.",
-  },
-];
-
 export default async function Home() {
-  const [cms, databaseNews, databaseProjects] = await Promise.all([
+  const [cms, databaseNews, databaseProjects, databaseEnterprises] = await Promise.all([
     getPublishedContent(),
     getPublicRecords("news"),
     getPublicRecords("projects"),
+    getPublicRecords("enterprises", DEFAULT_ENTERPRISES),
   ]);
+  const enterprises = databaseEnterprises.map((item) => ({ ...DEFAULT_ENTERPRISES.find((entry) => entry.slug === item.slug), ...item }));
+  const settings = { ...DEFAULT_SITE_SETTINGS, ...cms["organisation-settings"] };
   const hero = cms["hero-section"] || {};
   const about = cms["about-cedah"] || {};
   const publicUpdates = databaseNews.length
@@ -128,43 +111,31 @@ export default async function Home() {
           : "Latest",
         title: String(item.title || "CEDAH update"),
         text: String(item.excerpt || ""),
+        body: String(item.body || ""),
+        image: String(item.image_url || ""),
       }))
-    : updates;
+    : [];
   const currentProjects = databaseProjects.length
     ? databaseProjects.map((item) => ({
         title: String(item.title || "Current activity"),
         text: String(item.summary || ""),
         status: String(item.stage || item.status || "Published"),
         category: String(item.category || "Field activity"),
+        body: String(item.content || ""),
+        location: String(item.location || ""),
+        image: String(item.image_url || ""),
       }))
-    : [
-        {
-          title: "Crop production launch planning",
-          text: "Farm planning, production systems, input strategy and responsible routes to market.",
-          status: "In preparation",
-          category: "Crop enterprise",
-        },
-        {
-          title: "Beef systems and supplier mapping",
-          text: "Developing livestock health, traceability, production and market-readiness frameworks.",
-          status: "In preparation",
-          category: "Beef enterprise",
-        },
-        {
-          title: "Founding partner engagement",
-          text: "Building relationships across capital, technical expertise, supply and off-take.",
-          status: "Open",
-          category: "Partnerships",
-        },
-      ];
+    : [];
   return (
-    <main>
+    <>
       <ScrollProgress />
-      <Header />
+      <Header settings={settings} />
+      <main id="main-content" tabIndex={-1}>
       <section className="hero" id="home">
         <Image
-          src="/images/cedah-hero.png"
-          alt="Green crop fields and beef cattle on a Ugandan farm at sunrise"
+          src={hero.image_url && isSafeUrl(hero.image_url) ? hero.image_url : "/images/cedah-hero.png"}
+          unoptimized={Boolean(hero.image_url)}
+          alt={hero.image_url ? "CEDAH agriculture" : "Illustration of green crop fields and beef cattle at sunrise"}
           fill
           priority
           sizes="100vw"
@@ -192,7 +163,7 @@ export default async function Home() {
           </p>
           <div className="hero-actions">
             <Link
-              href={hero.buttonLink || "#enterprises"}
+              href={hero.buttonLink && isSafeUrl(hero.buttonLink, true) ? hero.buttonLink : "#enterprises"}
               className="button teal"
             >
               {hero.buttonLabel || "Explore our enterprises"} <Arrow />
@@ -266,23 +237,19 @@ export default async function Home() {
                 "Capital Economic Development Alliance Holdings Ltd. is a Ugandan enterprise creating a connected future for agriculture, industry and communities."}
             </p>
             <p>
-              We bring production, processing, skills and market access into one
-              practical model, building businesses that grow profitably while
-              expanding opportunity for farmers, young people and local
-              economies.
+              {about.body || "We bring production, processing, skills and market access into one practical model, building businesses that grow profitably while expanding opportunity for farmers, young people and local economies."}
             </p>
             <div className="vision-mission">
               <div>
                 <small>Our vision</small>
                 <b>
-                  To become a leading East African industrial agribusiness
-                  group.
+                  {about.vision || "To become a leading East African industrial agribusiness group."}
                 </b>
               </div>
               <div>
                 <small>Our mission</small>
                 <b>
-                  To produce quality, create work and grow community prosperity.
+                  {about.mission || "To produce quality, create work and grow community prosperity."}
                 </b>
               </div>
             </div>
@@ -292,6 +259,8 @@ export default async function Home() {
           </Reveal>
         </div>
       </section>
+
+      <ObjectivesSection />
 
       <section className="story-visual section" id="opportunity">
         <div className="shell story-grid">
@@ -313,7 +282,7 @@ export default async function Home() {
               target="_blank"
               rel="noreferrer"
             >
-              Photo source: Pexels ↗
+              Illustrative photo: Pexels ↗
             </a>
           </Reveal>
           <Reveal className="story-copy" delay={120}>
@@ -389,57 +358,28 @@ export default async function Home() {
             </p>
           </Reveal>
           <div className="venture-grid">
-            <Reveal>
-              <Link
-                href="#contact"
-                className="venture-card crop-card"
-                id="crop-enterprise"
-              >
-                <div className="card-num">01 / CROPS</div>
-                <div className="round-icon">
-                  <Icon name="crop" />
-                </div>
-                <h3>Crop enterprise</h3>
-                <p>
-                  Commercial crop production with a focus on quality,
-                  productivity and future value addition, from farm planning to
-                  market.
-                </p>
-                <ul>
-                  <li>Maize and selected high-value crops</li>
-                  <li>Modern, climate-aware production systems</li>
-                  <li>Aggregation, milling and processing</li>
-                </ul>
-                <span className="venture-link">
-                  Discuss crop opportunities <Arrow />
-                </span>
-              </Link>
-            </Reveal>
-            <Reveal delay={140}>
-              <Link
-                href="#contact"
-                className="venture-card beef-card"
-                id="beef-enterprise"
-              >
-                <div className="card-num">02 / BEEF</div>
-                <div className="round-icon">
-                  <Icon name="beef" />
-                </div>
-                <h3>Beef enterprise</h3>
-                <p>
-                  A responsible, traceable beef value chain built from healthy
-                  livestock and reliable systems to quality markets.
-                </p>
-                <ul>
-                  <li>Livestock and ranch production</li>
-                  <li>Animal health and traceability</li>
-                  <li>Processing, packaging and market linkage</li>
-                </ul>
-                <span className="venture-link">
-                  Discuss beef opportunities <Arrow />
-                </span>
-              </Link>
-            </Reveal>
+            {enterprises.map((item, index) => {
+              const livestock = /beef|livestock|cattle|dairy|goat/i.test(String(item.title));
+              const photo = typeof item.image_url === "string" && isSafeUrl(item.image_url) ? item.image_url : "";
+              const illustration = ["/images/grain-enterprise.jpg", "/images/field-farmer.jpg", "/images/cattle-ranch.jpg"].includes(photo);
+              const highlights = String(item.highlights || "").split("\n").map((line) => line.trim()).filter(Boolean);
+              return <Reveal key={String(item.slug)} delay={(index % 2) * 100}>
+                <article id={String(item.slug)} className={`venture-card enterprise-photo-card ${livestock ? "beef-card" : "crop-card"}`}>
+                  {photo && <figure className="enterprise-photo">
+                    <Image src={photo} alt={illustration ? `Illustrative ${livestock ? "cattle ranch" : "grain production"} photograph` : String(item.title)} fill sizes="(max-width: 800px) 100vw, 50vw" unoptimized={!photo.startsWith("/images/")} />
+                    <figcaption>{illustration ? "Illustrative photograph" : String(item.title)}</figcaption>
+                  </figure>}
+                  <div className="enterprise-card-body">
+                    <div className="enterprise-card-heading"><div className="round-icon"><Icon name={livestock ? "beef" : "crop"} /></div><span>{String(item.phase || "Enterprise")}</span></div>
+                    <h3>{String(item.title || "")}</h3>
+                    <p>{String(item.summary || "")}</p>
+                    {highlights.length > 0 && <ul>{highlights.map((line) => <li key={line}>{line}</li>)}</ul>}
+                    {!!item.content && <details><summary>Read enterprise details</summary><p className="preserve-lines">{String(item.content)}</p></details>}
+                    <a href="#contact" className="venture-link">Discuss this enterprise <Arrow /></a>
+                  </div>
+                </article>
+              </Reveal>;
+            })}
           </div>
         </div>
       </section>
@@ -577,12 +517,11 @@ export default async function Home() {
               target="_blank"
               rel="noreferrer"
             >
-              Photo: Kelly Sikkema / Unsplash ↗
+              Illustrative photo: Kelly Sikkema / Unsplash ↗
             </a>
           </Reveal>
         </div>
       </section>
-
       <section className="roadmap section" id="roadmap">
         <div className="shell">
           <Reveal className="center-head">
@@ -600,61 +539,7 @@ export default async function Home() {
               protecting quality and long-term value.
             </p>
           </Reveal>
-          <div className="timeline">
-            <div className="timeline-line" />
-            <Reveal>
-              <Link href="#contact" className="timeline-card-link">
-                <article className="active">
-                  <span>Now</span>
-                  <b>Launch foundations</b>
-                  <p>
-                    Crop production, beef enterprise, operating systems and
-                    founding partnerships.
-                  </p>
-                  <span className="timeline-link">Discuss this phase ↗</span>
-                </article>
-              </Link>
-            </Reveal>
-            <Reveal delay={100}>
-              <Link href="#contact" className="timeline-card-link">
-                <article>
-                  <span>Next</span>
-                  <b>Value addition</b>
-                  <p>
-                    Maize milling, animal feed, meat handling, aggregation and
-                    stronger market access.
-                  </p>
-                  <span className="timeline-link">Discuss this phase ↗</span>
-                </article>
-              </Link>
-            </Reveal>
-            <Reveal delay={200}>
-              <Link href="#contact" className="timeline-card-link">
-                <article>
-                  <span>Scale</span>
-                  <b>Skills & industry</b>
-                  <p>
-                    Enterprise-linked training, graduate employment and
-                    additional selected crops.
-                  </p>
-                  <span className="timeline-link">Discuss this phase ↗</span>
-                </article>
-              </Link>
-            </Reveal>
-            <Reveal delay={300}>
-              <Link href="#contact" className="timeline-card-link">
-                <article>
-                  <span>Future</span>
-                  <b>Regional growth</b>
-                  <p>
-                    Multiple sites, export-ready standards and expansion into
-                    East African markets.
-                  </p>
-                  <span className="timeline-link">Discuss this phase ↗</span>
-                </article>
-              </Link>
-            </Reveal>
-          </div>
+          <PublishedRoadmap />
         </div>
       </section>
 
@@ -672,9 +557,7 @@ export default async function Home() {
               </h2>
             </div>
             <p>
-              CEDAH’s model is designed around real work: producing well,
-              handling quality carefully, building dependable teams and
-              connecting every stage to a viable market.
+              These illustrative images introduce the model we are building. Visit our field evidence section for dated photographs and videos from CEDAH activities.
             </p>
           </Reveal>
           <div className="gallery-grid">
@@ -698,7 +581,7 @@ export default async function Home() {
                 target="_blank"
                 rel="noreferrer"
               >
-                Photo source: Pexels ↗
+                Illustrative photo: Pexels ↗
               </a>
             </Reveal>
             <Reveal delay={120}>
@@ -793,6 +676,8 @@ export default async function Home() {
         </div>
       </section>
 
+      <ImpactDashboard />
+
       <section className="investment section" id="investment">
         <div className="shell">
           <Reveal className="investment-head">
@@ -851,21 +736,11 @@ export default async function Home() {
               </Reveal>
             ))}
           </div>
-          <Reveal className="due-diligence">
-            <div>
-              <span>Partner-ready information</span>
-              <b>Concept note</b>
-              <b>Phased budget</b>
-              <b>Risk register</b>
-              <b>Impact framework</b>
-              <b>Governance profile</b>
-            </div>
-            <Link href="#contact">
-              Open a due-diligence conversation <Arrow />
-            </Link>
-          </Reveal>
+          <Reveal className="due-diligence"><div><span>Partner-ready information</span><b>Approved documents & governance records</b></div><Link href="#data-room">Explore the partner data room <Arrow /></Link></Reveal>
         </div>
       </section>
+
+      <TrustSections />
 
       <section className="get-involved section" id="get-involved">
         <div className="shell">
@@ -938,23 +813,25 @@ export default async function Home() {
               </h2>
             </div>
             <p>
-              These records can be published directly by the super
-              administrator. They give partners a transparent view of current
-              priorities, progress and opportunities to contribute.
+              Follow published priorities, progress and opportunities to contribute as CEDAH develops its operations.
             </p>
           </Reveal>
+          {!currentProjects.length && <p className="platform-empty">Project updates will be published as milestones are confirmed.</p>}
           <div className="work-grid">
             {currentProjects.slice(0, 6).map((project, i) => (
               <Reveal key={project.title} delay={(i % 3) * 80}>
-                <Link href="#contact" className="work-card">
+                <article className="work-card">
                   <div>
                     <span>{project.category}</span>
                     <em>{project.status}</em>
                   </div>
+                  {project.image && isSafeUrl(project.image) && <Image src={project.image} alt={project.title} width={700} height={450} unoptimized className="record-preview-image" />}
                   <h3>{project.title}</h3>
                   <p>{project.text}</p>
-                  <b>Discuss or support this work ↗</b>
-                </Link>
+                  {project.location && <p>{project.location}</p>}
+                  {project.body && <details><summary>Read project details</summary><p className="preserve-lines">{project.body}</p></details>}
+                  <a href="#contact" className="platform-link">Discuss or support this work ↗</a>
+                </article>
               </Reveal>
             ))}
           </div>
@@ -979,25 +856,28 @@ export default async function Home() {
               Media enquiries <Arrow />
             </Link>
           </Reveal>
+          {!publicUpdates.length && <p className="platform-empty">News and field updates will appear here when published. <a href="#newsletter">Stay informed ↗</a></p>}
           <div className="news-grid">
             {publicUpdates.map((item, i) => (
               <Reveal key={item.title} delay={i * 100}>
-                <Link href="#contact" className="news-card">
+                <article className="news-card">
+                  {item.image && isSafeUrl(item.image) && <Image src={item.image} alt={item.title} width={700} height={450} unoptimized className="record-preview-image" />}
                   <div className="news-meta">
                     <span>{item.tag}</span>
                     <time>{item.date}</time>
                   </div>
                   <h3>{item.title}</h3>
                   <p>{item.text}</p>
-                  <span className="news-read">
-                    Discuss this update <Arrow />
-                  </span>
-                </Link>
+                  {item.body && <details><summary>Read the update</summary><p className="preserve-lines">{item.body}</p></details>}
+                  <a href="#contact" className="platform-link">Discuss this update <Arrow /></a>
+                </article>
               </Reveal>
             ))}
           </div>
         </div>
       </section>
+
+      <ParticipationSections />
 
       <section className="cta section" id="contact">
         <div className="shell cta-box">
@@ -1017,9 +897,11 @@ export default async function Home() {
             </p>
             <div className="contact-direct">
               <span>Direct email</span>
-              <a href="mailto:info@cedah.com">info@cedah.com</a>
+              <a href={`mailto:${settings.publicEmail}`}>{settings.publicEmail}</a>
+              <span>Telephone / WhatsApp</span>
+              <a href={`tel:${settings.phone}`}>{settings.phone}</a>
               <span>Head office</span>
-              <b>Kampala, Uganda</b>
+              <b>{settings.location}</b>
             </div>
           </Reveal>
           <Reveal delay={130}>
@@ -1027,7 +909,8 @@ export default async function Home() {
           </Reveal>
         </div>
       </section>
-      <Footer />
-    </main>
+      </main>
+      <Footer settings={settings} />
+    </>
   );
 }

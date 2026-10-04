@@ -1,5 +1,7 @@
 import { databaseConfigured, getDatabase } from "@/lib/mongodb";
-export async function getPublishedContent() {
+import { cache } from "react";
+import { DEFAULT_SITE_SETTINGS, RESOURCE_CONFIG, type ResourceName } from "@/lib/platform";
+export const getPublishedContent = cache(async () => {
   if (!databaseConfigured())
     return {} as Record<string, Record<string, string>>;
   try {
@@ -20,25 +22,30 @@ export async function getPublishedContent() {
   } catch {
     return {};
   }
-}
-const publicCollections = {
-  news: "news_posts",
-  projects: "projects",
-  opportunities: "funding_opportunities",
-  team: "team_partners",
-  enterprises: "enterprises",
-} as const;
-export async function getPublicRecords(name: keyof typeof publicCollections) {
-  if (!databaseConfigured()) return [] as Record<string, unknown>[];
+});
+export const getSiteSettings = cache(async () => {
+  const content = await getPublishedContent();
+  return { ...DEFAULT_SITE_SETTINGS, ...(content["organisation-settings"] || {}) };
+});
+export async function getPublicRecords(name: ResourceName, defaults: Record<string, unknown>[] = []) {
+  if (!databaseConfigured()) return defaults;
   try {
     const database = await getDatabase();
-    return await database
-      .collection(publicCollections[name])
-      .find({ status: "published" }, { projection: { _id: 0 } })
-      .sort({ published_at: -1, updated_at: -1 })
-      .limit(24)
+    const records = await database
+      .collection(RESOURCE_CONFIG[name].collection)
+      .find(name === "impact-metrics" ? { published: true } : { status: "published" }, { projection: { _id: 0, updated_by: 0 } })
+      .sort({ sort_order: 1, published_at: -1, updated_at: -1 })
+      .limit(100)
       .toArray();
+    // An existing (even empty) collection is managed content. Never restore
+    // starter records after an administrator unpublishes or deletes them.
+    if (!records.length && defaults.length) {
+      const exists = await database.listCollections({ name: RESOURCE_CONFIG[name].collection }, { nameOnly: true }).hasNext();
+      if (!exists) return defaults;
+    }
+    return records;
   } catch {
+    // A temporary database failure must not resurrect unpublished starter data.
     return [];
   }
 }

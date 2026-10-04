@@ -21,9 +21,9 @@ export function createSession(email: string, name: string) {
   return `${payload}.${sign(payload)}`;
 }
 export function verifySession(token?: string): Session | null {
-  if (!token) return null;
-  const [payload, signature] = token.split(".");
-  if (!payload || !signature) return null;
+  if (!token || !process.env.AUTH_SECRET || token.length > 4096) return null;
+  const [payload, signature, extra] = token.split(".");
+  if (!payload || !signature || extra !== undefined || !/^[A-Za-z0-9_-]+$/.test(payload) || !/^[A-Za-z0-9_-]{43}$/.test(signature)) return null;
   const expected = sign(payload);
   if (
     signature.length !== expected.length ||
@@ -34,7 +34,7 @@ export function verifySession(token?: string): Session | null {
     const data = JSON.parse(
       Buffer.from(payload, "base64url").toString(),
     ) as Session;
-    return data.exp > Date.now() ? data : null;
+    return typeof data.email === "string" && typeof data.name === "string" && typeof data.exp === "number" && Number.isFinite(data.exp) && data.exp > Date.now() ? data : null;
   } catch {
     return null;
   }

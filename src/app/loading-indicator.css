@@ -1,0 +1,34 @@
+.cedah-loading { --loader-green: #087e89; --loader-gold: #b88735; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 44px 20px; color: var(--ink, #163629); text-align: center; }
+.cedah-loading.is-page { min-height: 75svh; background: radial-gradient(ellipse at center, color-mix(in srgb, var(--loader-green) 6%, transparent), transparent 65%); }
+.cedah-loading-mark { width: 116px; height: 116px; flex: 0 0 auto; display: inline-flex; color: var(--loader-green, #087e89); vertical-align: middle; }
+.cedah-loading-mark svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.loader-halo { stroke: currentColor; stroke-opacity: .09; stroke-width: 1; }
+.loader-ring { stroke: currentColor; stroke-width: 2; stroke-dasharray: 32 18; stroke-linecap: round; }
+.loader-orbit { transform-origin: 60px 60px; animation: cedah-orbit 3.6s linear infinite; }
+.loader-seed { fill: var(--loader-gold, #b88735); }
+.loader-seed-secondary { fill: currentColor; }
+.loader-field { stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; opacity: .3; }
+.loader-stem { stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
+.loader-leaf { fill: currentColor; }
+.leaf-left { opacity: .68; }
+.loader-vein { stroke: var(--surface, #fff); stroke-opacity: .65; stroke-width: 1.5; stroke-linecap: round; }
+.loader-sprout { transform-origin: 60px 80px; animation: cedah-grow 2.4s ease-in-out infinite; }
+.cedah-loading-copy { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.cedah-loading-brand { font: 750 25px var(--font-display, sans-serif); letter-spacing: .3em; padding-left: .3em; }
+.cedah-loading-purpose { font-size: 12px; letter-spacing: .025em; color: var(--muted, #657870); }
+.cedah-loading-label { display: flex; align-items: center; gap: 9px; margin-top: 10px; font-size: 12px; color: var(--muted, #657870); line-height: 1.7; }
+.loader-dots { display: inline-flex; gap: 3px; }
+.loader-dots i { display: block; width: 3px; height: 3px; border-radius: 50%; background: currentColor; animation: cedah-dot 1.4s ease-in-out infinite; }
+.loader-dots i:nth-child(2) { animation-delay: .16s; }
+.loader-dots i:nth-child(3) { animation-delay: .32s; }
+.cedah-loading.is-compact { padding: 32px 16px; gap: 10px; }
+.cedah-loading.is-compact .cedah-loading-mark { width: 68px; height: 68px; }
+.cedah-loading.is-compact .cedah-loading-label { margin-top: 0; }
+.cedah-loading-mark.is-small { width: 25px; height: 25px; margin-right: 8px; color: inherit; --loader-gold: currentColor; }
+.cedah-loading-mark.is-small .loader-ring { stroke-width: 5; }
+.cedah-loading-mark.is-small .loader-field, .cedah-loading-mark.is-small .loader-halo { display: none; }
+html[data-theme="dark"] .cedah-loading { --loader-green: #67cbb7; --loader-gold: #e0ba73; }
+@keyframes cedah-orbit { to { transform: rotate(360deg); } }
+@keyframes cedah-grow { 0%,100% { transform: scale(.94) rotate(-2deg); opacity: .8; } 50% { transform: scale(1) rotate(2deg); opacity: 1; } }
+@keyframes cedah-dot { 0%,75%,100% { opacity: .25; transform: translateY(0); } 35% { opacity: 1; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .cedah-loading *, .cedah-loading-mark * { animation: none !important; } .loader-dots i { opacity: .6; } }

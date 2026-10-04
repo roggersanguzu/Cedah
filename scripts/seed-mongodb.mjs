@@ -1,5 +1,18 @@
 import { setServers } from "node:dns";
 import { MongoClient, ServerApiVersion } from "mongodb";
+import { readFileSync } from "node:fs";
+import ts from "typescript";
+
+// Reuse the same founding content shown in the website and administrator UI.
+// TypeScript is already a project development dependency; no services are used
+// while loading this trusted local module.
+const starterContent = {};
+const compiledDefaults = ts.transpileModule(
+  readFileSync(new URL("../src/lib/platform.ts", import.meta.url), "utf8"),
+  { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } },
+).outputText;
+new Function("exports", compiledDefaults)(starterContent);
+const { DEFAULT_ENTERPRISES, DEFAULT_OBJECTIVES, DEFAULT_IMPACT_TARGET, DEFAULT_ROADMAP } = starterContent;
 
 const uri = process.env.MONGODB_URI;
 if (!uri) throw new Error("MONGODB_URI is missing from .env.local");
@@ -42,26 +55,10 @@ const seeds = {
       published: true,
     },
   ],
-  enterprises: [
-    {
-      slug: "crop-enterprise",
-      title: "Crop enterprise",
-      summary:
-        "Maize-led crop production, aggregation and a disciplined path into processing and value addition.",
-      phase: "Launch enterprise",
-      status: "published",
-      readiness: 68,
-    },
-    {
-      slug: "beef-enterprise",
-      title: "Beef enterprise",
-      summary:
-        "Responsible livestock systems built around animal health, traceability, quality and dependable markets.",
-      phase: "Launch enterprise",
-      status: "published",
-      readiness: 52,
-    },
-  ],
+  enterprises: DEFAULT_ENTERPRISES,
+  objectives: DEFAULT_OBJECTIVES,
+  impact_metrics: [DEFAULT_IMPACT_TARGET],
+  roadmap: DEFAULT_ROADMAP,
   news_posts: [
     {
       slug: "crop-and-beef-launch-value-chains",
@@ -133,6 +130,7 @@ const seeds = {
         "Strategic leadership for CEDAH's enterprise, governance and partnership development.",
       status: "draft",
       role: "Leadership",
+      kind: "leadership",
       organisation: "CEDAH",
     },
   ],
@@ -145,6 +143,9 @@ const keys = {
   projects: "slug",
   funding_opportunities: "slug",
   team_partners: "slug",
+  objectives: "slug",
+  impact_metrics: "metric_key",
+  roadmap: "slug",
 };
 
 try {
@@ -159,8 +160,7 @@ try {
       const result = await collection.updateOne(
         { [key]: record[key] },
         {
-          $setOnInsert: { ...record, created_at: new Date() },
-          $set: { updated_at: new Date() },
+          $setOnInsert: { ...record, created_at: new Date(), updated_at: new Date() },
         },
         { upsert: true },
       );

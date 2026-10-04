@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
+import { LoadingMark } from "@/components/LoadingIndicator";
 export default function Login() {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -14,25 +15,24 @@ export default function Login() {
     setError("");
     setLoading(true);
     const values = Object.fromEntries(new FormData(e.currentTarget));
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
-    const result = (await response.json().catch(() => ({}))) as {
-      error?: string;
-    };
-    setLoading(false);
-    if (!response.ok) {
-      setError(
-        response.status === 429
-          ? result.error || "Too many sign-in attempts. Please try again later."
-          : "The email or password is incorrect.",
-      );
-      return;
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const result = (await response.json().catch(() => ({}))) as { error?: string };
+      if (!response.ok) {
+        setError(response.status === 401 ? "The email or password is incorrect." : result.error || "Sign-in is unavailable. Please try again shortly.");
+        return;
+      }
+      router.push("/admin");
+      router.refresh();
+    } catch {
+      setError("Unable to connect. Check your connection and try again.");
+    } finally {
+      setLoading(false);
     }
-    router.push("/admin");
-    router.refresh();
   }
   return (
     <main className="login-page">
@@ -113,9 +113,9 @@ export default function Login() {
               </button>
             </span>
           </label>
-          {error && <div className="login-error">{error}</div>}
+          {error && <div className="login-error" role="alert">{error}</div>}
           <button disabled={loading}>
-            {loading ? "Signing in…" : "Sign in to dashboard"}
+            {loading ? <><LoadingMark small /> Signing in…</> : "Sign in to dashboard"}
             <span>→</span>
           </button>
           <Link href="/">← Return to website</Link>

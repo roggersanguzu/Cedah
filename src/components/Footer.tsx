@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-export default function Footer() {
+import { DEFAULT_SITE_SETTINGS } from "@/lib/platform";
+export default function Footer({ settings }: { settings?: Partial<typeof DEFAULT_SITE_SETTINGS> }) {
+  const organisation = { ...DEFAULT_SITE_SETTINGS, ...settings };
   return (
     <footer>
       <div className="shell footer-main">
@@ -23,23 +25,27 @@ export default function Footer() {
         <div>
           <b>Company</b>
           <Link href="/#about">About us</Link>
+          <Link href="/#objectives">Our objectives</Link>
+          <Link href="/#leadership">Board & leadership</Link>
           <Link href="/#how-we-work">Our model</Link>
-          <Link href="/#impact">Impact</Link>
+          <Link href="/#impact-dashboard">Reported impact</Link>
           <Link href="/#investment">Investment case</Link>
           <Link href="/#news">News</Link>
         </div>
         <div>
           <b>Enterprises</b>
-          <Link href="/#crop-enterprise">Crop enterprise</Link>
-          <Link href="/#beef-enterprise">Beef enterprise</Link>
+          <Link href="/#enterprises">Crop enterprise</Link>
+          <Link href="/#enterprises">Beef enterprise</Link>
           <Link href="/#roadmap">Growth roadmap</Link>
           <Link href="/#sustainability">Sustainability</Link>
-          <Link href="/#contact">Market access</Link>
+          <Link href="/#market-prices">Market prices</Link>
+          <Link href="/#products">Products & buyers</Link>
         </div>
         <div>
           <b>Resources</b>
-          <Link href="/#investment">Partner brief</Link>
-          <Link href="/#field-stories">Field stories</Link>
+          <Link href="/#data-room">Partner data room</Link>
+          <Link href="/#field-work">Field work</Link>
+          <Link href="/#participate">Farmer & training registration</Link>
           <Link href="/privacy">Privacy policy</Link>
           <Link href="/terms">Terms of use</Link>
           <Link href="/admin/login">Administrator login</Link>
@@ -47,19 +53,21 @@ export default function Footer() {
         <div>
           <b>Connect</b>
           <Link href="/#contact">Partner with us</Link>
-          <a href="mailto:info@cedah.com">info@cedah.com</a>
-          <span>Kampala, Uganda</span>
-          <a
-            href={process.env.NEXT_PUBLIC_LINKEDIN_URL || "/#contact"}
+          <Link href="/#newsletter">Newsletter signup</Link>
+          <a href={`mailto:${organisation.publicEmail}`}>{organisation.publicEmail}</a>
+          <a href={`tel:${organisation.phone}`}>{organisation.phone}</a>
+          <span>{organisation.location}</span>
+          {process.env.NEXT_PUBLIC_LINKEDIN_URL && <a
+            href={process.env.NEXT_PUBLIC_LINKEDIN_URL}
             target="_blank"
             rel="noreferrer"
           >
             LinkedIn ↗
-          </a>
+          </a>}
         </div>
       </div>
       <div className="shell copyright">
-        <span>© 2026 Capital Economic Development Alliance Holdings Ltd.</span>
+        <span>© {new Date().getFullYear()} {organisation.legalName}</span>
         <span>
           <Link href="/privacy">Privacy</Link> ·{" "}
           <Link href="/terms">Terms</Link> · Built for growth

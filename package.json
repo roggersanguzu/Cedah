@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:platform": "node --test scripts/platform.test.mjs",
+    "check:styles": "node scripts/check-styles.mjs",
     "db:setup": "node --env-file=.env.local scripts/setup-mongodb.mjs",
     "db:seed": "node --env-file=.env.local scripts/seed-mongodb.mjs",
     "app:smoke": "node --env-file=.env.local scripts/smoke-app.mjs",
@@ -15,7 +17,7 @@
   },
   "dependencies": {
     "mongodb": "^7.6.0",
-    "next": "16.3.0",
+    "next": "^16.3.8",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
